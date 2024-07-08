@@ -1,0 +1,51 @@
+version: '3.2'
+services:
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - my_network
+
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    stop_signal: SIGKILL
+    expose:
+      - 8000
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.dist
+    networks:
+      - my_network
+
+
+  db:
+    image: postgres
+    environment:
+      - "POSTGRES_USER=${POSTGRES__USER}"
+      - "POSTGRES_PASSWORD=${POSTGRES__PASSWORD}"
+      - "POSTGRES_DB=${POSTGRES__DB}"
+    ports:
+      - '5432:5432'
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
+
+volumes:
+  db_data:
+
